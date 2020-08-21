@@ -1,8 +1,35 @@
+from selenium import webdriver
+import datetime
+import time
 import requests
 from bs4 import BeautifulSoup
 
-result = requests.get("https://www.jiosaavn.com/s/playlist/2f2eb4bf021ec45fe1f092f1b530fd68/Selection/VQiQItdV-,xuOxiEGmm6lQ__")
-src = result.content
+options = webdriver.ChromeOptions()
+options.add_argument("--start-maximized")
+
+driver = webdriver.Chrome(chrome_options=options)
+driver.get("https://www.jiosaavn.com/s/playlist/2f2eb4bf021ec45fe1f092f1b530fd68/Selection/VQiQItdV-,xuOxiEGmm6lQ__")
+
+pause_time = 2
+
+last_height = driver.execute_script("return document.body.scrollHeight")
+
+while True:
+    # Scroll down to bottom
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+    # wait to load page
+    time.sleep(pause_time)
+
+    # Calculate new scroll height and compare with last scroll height
+    new_height = driver.execute_script("return document.body.scrollHeight")
+    if new_height == last_height: # which means end of page
+        break
+    # update the last height
+    last_height = new_height
+
+src = driver.page_source
+
 result_list = []
 abcd = []
 
@@ -42,8 +69,8 @@ for div in divdata:
         result_list[i] = result_list[i]+ "|" + secdiv.img.get("src")
     i=i+1
 
-for x in result_list:
-    x = x.replace(", ", "^")
+for x in range(len(result_list)):
+    result_list[x] = result_list[x].replace(", ", "^")
     # print(x)
 
 for h1 in soup.findAll("h1", {"class": "u-h2"}):
